@@ -40,12 +40,37 @@ var gen_parentality = 0.2;
 var gen_mutation = 0.05;
 var gen_counter = 0;
 var nWheels = 8;
+var nCargo = 2;
 var nAttributes = nWheels /*num wheels*/ * 5 /* radius+density+vertex+speed+type */ + 8 /*vertices*/; // change this when genome changes
 var leg_wheel_ratio = 0.5;
 var gravity = new b2Vec2(0.0, -9.81);
 var doSleep = true;
 
 var world = new b2World(gravity, doSleep);
+
+var listener = new b2ContactListener;
+    listener.BeginContact = function(contact) {
+		var idA = contact.GetFixtureA().GetBody();
+		var idB = contact.GetFixtureB().GetBody();
+		if (idA.wheelType == 2 && idB.wheelType == -1) {
+			idA.dead = true;
+		}
+		
+		if (idA.wheelType == -1 && idB.wheelType == 2) {
+			idB.dead = true;
+		}
+        // console.log(contact.GetFixtureA().GetBody().GetUserData());
+    }
+    listener.EndContact = function(contact) {
+        // console.log(contact.GetFixtureA().GetBody().GetUserData());
+    }
+    listener.PostSolve = function(contact, impulse) {
+        
+    }
+    listener.PreSolve = function(contact, oldManifold) {
+
+    }
+world.SetContactListener(listener);
 
 var zoom = 70;
 
@@ -111,8 +136,11 @@ cw_Car.prototype.wheels = null;
 cw_Car.prototype.__constructor = function(car_def) {
   this.chassis = cw_createChassis(car_def.vertex_list);
   this.wheels = new Array();
-  for(var i = 0; i < nWheels; i++) {
+  for(var i = 0; i < nWheels - nCargo; i++) {
 	  this.wheels.push( cw_createWheel(car_def.wheel_radius[i], car_def.wheel_density[i], car_def.wheel_type[i]) );
+  }
+  for(var j = 0; j < nCargo; j++) {
+  	this.wheels.push( cw_createWheel(wheelMinRadius +  .5 * wheelMaxRadius, wheelMinDensity + .5 * wheelMaxDensity, 2) )
   }
   var carmass = this.chassis.GetMass();
   for(var i = 0; i < nWheels; i++)  {
@@ -216,7 +244,7 @@ function cw_createWheel(radius, density, type) {
 
   body.CreateFixture(fix_def);
   body.wheelType = type;
-
+  body.dead = false;
   return body;
 }
 
@@ -320,6 +348,7 @@ function cw_createFloorTile(position, angle) {
   fix_def.shape.SetAsArray(newcoords);
 
   body.CreateFixture(fix_def);
+  body.wheelType = -1;
   return body;
 }
 
@@ -634,7 +663,7 @@ function cw_drawCar(myCar) {
 		for (f = b.GetFixtureList(); f; f = f.m_next) {
 		  var s = f.GetShape();
 		  var color = Math.round(255 - (255 * (f.m_density - wheelMinDensity)) / wheelMaxDensity).toString();
-		  var rgbcolor = "rgb("+color+","+color+","+color+")";
+		  var rgbcolor = (myCar.wheels[i].wheelType == 1) ? "rgb("+color+","+color+","+color+")" : "rgb(0, 0, "+color+")";
 		  cw_drawCircle(b, s.m_p, s.m_radius, b.m_sweep.a, rgbcolor);
 		}
     }
@@ -862,12 +891,20 @@ function cw_checkDeath() {
   } else if (myCar.getPosition().y < bottom_height - 20) {
     car_health = 0;
     return true;
-  } else {
-    car_health--;
-    if(car_health == 0) {
-      return true;
-    }
   }
+
+  car_health--;
+
+  if(car_health <= 0) {
+    return true;
+  }
+
+  for(var j = 0; j < nCargo; j++) {
+  	if (myCar.wheels[nWheels - j - 1].dead == true) {
+		return true;
+  	}
+  }
+
   document.getElementById("health").innerHTML = "Health: " + car_health;
 
   // check speed
