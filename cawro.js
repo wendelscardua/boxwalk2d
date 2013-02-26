@@ -53,13 +53,18 @@ var listener = new b2ContactListener;
 		var idA = contact.GetFixtureA().GetBody();
 		var idB = contact.GetFixtureB().GetBody();
 		if (idA.wheelType == 2 && idB.wheelType == -1) {
-			idA.dead = true;
+			idA.is_dead = true;
+//            console.log("Colide");
+//            console.log(contact.GetFixtureA().GetBody());
+//            console.log(contact.GetFixtureB().GetBody());
 		}
 		
 		if (idA.wheelType == -1 && idB.wheelType == 2) {
-			idB.dead = true;
+			idB.is_dead = true;
+//            console.log("Colide");
+//            console.log(contact.GetFixtureA().GetBody());
+//            console.log(contact.GetFixtureB().GetBody());
 		}
-        // console.log(contact.GetFixtureA().GetBody().GetUserData());
     }
     listener.EndContact = function(contact) {
         // console.log(contact.GetFixtureA().GetBody().GetUserData());
@@ -244,7 +249,7 @@ function cw_createWheel(radius, density, type) {
 
   body.CreateFixture(fix_def);
   body.wheelType = type;
-  body.dead = false;
+  body.is_dead = false;
   return body;
 }
 
@@ -300,16 +305,16 @@ function cw_createFloor() {
 			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k >= maxFloorTiles - 3 ? 1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
 			break;
 		case 1: // upstairs
-			last_tile = cw_createFloorTile(tile_position, k % 10 == 0 && k ? 1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
+			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k % 10 == 0 && k ? 1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
 			break;
 		case 2: // upwards
-    		last_tile = cw_createFloorTile(tile_position, k >= maxFloorTiles - 3 ? 1.5 : k % 20 == 0 && k ? (Math.random()*1.5-0.75)*k/maxFloorTiles : 0.5 * (k-3)/(maxFloorTiles-3));
+    		last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k >= maxFloorTiles - 3 ? 1.5 : k % 20 == 0 && k ? (Math.random()*1.5-0.75)*k/maxFloorTiles : 0.5 * (k-3)/(maxFloorTiles-3));
 			break;
 		case 3: // wave
-			last_tile = cw_createFloorTile(tile_position, 1.5*k/maxFloorTiles*Math.sin(30*k/maxFloorTiles));
+			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: 1.5*k/maxFloorTiles*Math.sin(30*k/maxFloorTiles));
 			break;
         case 4: // downstairs
-			last_tile = cw_createFloorTile(tile_position, k % 10 == 0 && k ? -1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
+			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k % 10 == 0 && k ? -1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
 			break;
     }
 	cw_floorTiles.push(last_tile);
@@ -900,7 +905,7 @@ function cw_checkDeath() {
   }
 
   for(var j = 0; j < nCargo; j++) {
-  	if (myCar.wheels[nWheels - j - 1].dead == true) {
+  	if (myCar.wheels[nWheels - j - 1].is_dead) {
 		return true;
   	}
   }
