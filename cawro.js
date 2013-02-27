@@ -579,9 +579,9 @@ function cw_changeLegWheelRatio() {
 }
 
 
-function cw_setNumWheels(arg_numWheels) {
-	nWheels = parseInt(arg_numWheels, 10);
-	nAttributes = nWheels /*num wheels*/ * 5 /* radius+density+vertex+speed+type */ + 8 /*vertices*/; // change this when genome changes
+function cw_setNumCargo(arg_numCargo) {
+	nCargo = parseInt(arg_numCargo, 10);
+	//nAttributes = nWheels /*num wheels*/ * 5 /* radius+density+vertex+speed+type */ + 8 /*vertices*/; // change this when genome changes
 	
 	cw_resetWorld();
 }
