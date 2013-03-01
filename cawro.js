@@ -308,7 +308,7 @@ function cw_createFloor() {
 			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k % 10 == 0 && k ? 1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
 			break;
 		case 2: // upwards
-    		last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k >= maxFloorTiles - 3 ? 1.5 : k % 20 == 0 && k ? (Math.random()*1.5-0.75)*k/maxFloorTiles : 0.5 * (k-3)/(maxFloorTiles-3));
+    		last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k >= maxFloorTiles - 3 ? 1.5 : k % 10 == 0 && k ? (Math.random()*3-1.5)*(k-3)/(maxFloorTiles-3) : 1.0 * (k-3)/(maxFloorTiles-3));
 			break;
 		case 3: // wave
 			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: 1.5*k/maxFloorTiles*Math.sin(30*k/maxFloorTiles));
