@@ -42,7 +42,8 @@ var gen_counter = 0;
 var nWheels = 8;
 var nCargo = 2;
 var nAttributes = nWheels /*num wheels*/ * 5 /* radius+density+vertex+speed+type */ + 8 /*vertices*/; // change this when genome changes
-var leg_wheel_ratio = 0.5;
+var leg_kind_tier = 0.33;
+var wheel_kind_tier = 0.67;
 var gravity = new b2Vec2(0.0, -9.81);
 var doSleep = true;
 
@@ -52,14 +53,14 @@ var listener = new b2ContactListener;
     listener.BeginContact = function(contact) {
 		var idA = contact.GetFixtureA().GetBody();
 		var idB = contact.GetFixtureB().GetBody();
-		if (idA.wheelType == 2 && idB.wheelType == -1) {
+		if (idA.wheelType == 10 && idB.wheelType == -1) {
 			idA.is_dead = true;
 //            console.log("Colide");
 //            console.log(contact.GetFixtureA().GetBody());
 //            console.log(contact.GetFixtureB().GetBody());
 		}
 		
-		if (idA.wheelType == -1 && idB.wheelType == 2) {
+		if (idA.wheelType == -1 && idB.wheelType == 100) {
 			idB.is_dead = true;
 //            console.log("Colide");
 //            console.log(contact.GetFixtureA().GetBody());
@@ -145,7 +146,7 @@ cw_Car.prototype.__constructor = function(car_def) {
 	  this.wheels.push( cw_createWheel(car_def.wheel_radius[i], car_def.wheel_density[i], car_def.wheel_type[i]) );
   }
   for(var j = 0; j < nCargo; j++) {
-  	this.wheels.push( cw_createWheel(wheelMinRadius +  .5 * wheelMaxRadius, wheelMinDensity + .5 * wheelMaxDensity, 2) )
+  	this.wheels.push( cw_createWheel(wheelMinRadius +  .5 * wheelMaxRadius, wheelMinDensity + .5 * wheelMaxDensity, 10) )
   }
   var carmass = this.chassis.GetMass();
   for(var i = 0; i < nWheels; i++)  {
@@ -239,7 +240,12 @@ function cw_createWheel(radius, density, type) {
   //fix_def.shape = new b2CircleShape(radius);
     fix_def.shape = new b2PolygonShape();
     fix_def.shape.SetAsOrientedBox(radius, radius * .1, new b2Vec2(radius, 0), 0);
-  } else { // wheel kind
+  } else if (type == 1) { // wheel kind
+	fix_def.shape = new b2CircleShape(radius);
+  } else if (type == 2) { // square wheel kind
+    fix_def.shape = new b2PolygonShape();
+    fix_def.shape.SetAsOrientedBox(radius, radius, new b2Vec2(0, 0), 0);
+  } else if (type == 10) { // cargo kind
 	fix_def.shape = new b2CircleShape(radius);
   }
   fix_def.density = density;
@@ -251,6 +257,17 @@ function cw_createWheel(radius, density, type) {
   body.wheelType = type;
   body.is_dead = false;
   return body;
+}
+
+function cw_randomWheelType() {
+	var rnd = Math.random();
+	if (rnd < leg_kind_tier) {
+		return 0;
+	} else if (rnd < wheel_kind_tier) {
+		return 1;
+	} else { // boxkind tier
+		return 2;
+	}
 }
 
 function cw_createRandomCar() {
@@ -266,7 +283,7 @@ function cw_createRandomCar() {
 	car_def.wheel_density.push( Math.random()*wheelMaxDensity+wheelMinDensity );
 	car_def.wheel_vertex.push( Math.floor(Math.random()*8)%8 );
 	car_def.wheel_speed.push( Math.random()*wheelMaxSpeed+wheelMinSpeed );
-	car_def.wheel_type.push(Math.random() > leg_wheel_ratio ? 1 : 0);
+	car_def.wheel_type.push( cw_randomWheelType() );
   }
 
   car_def.vertex_list = new Array();
@@ -573,7 +590,8 @@ function cw_setTrackFraction(arg_trackFraction) {
 }
 
 function cw_changeLegWheelRatio() {
-	leg_wheel_ratio = (document.getElementById("legWheelRatio").value);
+	leg_kind_tier = (document.getElementById("legKindTier").value);
+	wheel_kind_tier = (document.getElementById("wheelKindTier").value);
 	
 	cw_resetWorld();
 }
@@ -651,7 +669,7 @@ function cw_drawCar(myCar) {
   ctx.lineWidth = 1/zoom;
 
   for(i = 0; i < nWheels; i++) {
-    if (myCar.wheels[i].wheelType == 0) {
+    if (myCar.wheels[i].wheelType == 0 || myCar.wheels[i].wheelType == 2) {
 		  ctx.beginPath();
 		  var b = myCar.wheels[i];
 		  for (f = b.GetFixtureList(); f; f = f.m_next) {
