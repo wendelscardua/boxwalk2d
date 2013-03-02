@@ -174,8 +174,10 @@ cw_Car.prototype.__constructor = function(car_def) {
 	  joint_def.bodyB = this.wheels[i];
 	
 	  bodies[vertex] = this.wheels[i];
-	  anchors[vertex] = this.wheels[i].wheelType == 0 ? new b2Vec2(car_def.wheel_radius[i] * 2, 0) : new b2Vec2(0, 0);
 
+	  anchors[vertex] = this.wheels[i].wheelType == 0 ? new b2Vec2(car_def.wheel_radius[i] * 2, 0) : 
+						this.wheels[i].wheelType == 2 ? new b2Vec2(car_def.wheel_radius[i], car_def.wheel_radius[i]) :new b2Vec2(car_def.wheel_radius[i], 0);
+	
 	  var joint = world.CreateJoint(joint_def);
   }
 }
@@ -283,7 +285,7 @@ function cw_createRandomCar() {
 	car_def.wheel_density.push( Math.random()*wheelMaxDensity+wheelMinDensity );
 	car_def.wheel_vertex.push( Math.floor(Math.random()*8)%8 );
 	car_def.wheel_speed.push( Math.random()*wheelMaxSpeed+wheelMinSpeed );
-	car_def.wheel_type.push( cw_randomWheelType() );
+	car_def.wheel_type.push( i < nWheels - nCargo ? cw_randomWheelType() : 10 );
   }
 
   car_def.vertex_list = new Array();
@@ -528,8 +530,8 @@ function cw_mutate(car_def) {
 	    car_def.wheel_speed[i] = Math.abs(Math.random()*wheelMaxSpeed+wheelMinSpeed) * ( car_def.wheel_speed[i] > 0 ? 1 : -1);
 	  if(Math.random() < gen_mutation)
 	    car_def.wheel_speed[i] = -car_def.wheel_speed[i];
-	  if(Math.random() < gen_mutation)
-	    car_def.wheel_type[i] = 1-car_def.wheel_type[i];
+	  if(Math.random() < gen_mutation && i < nWheels - nCargo)
+	    car_def.wheel_type[i] = cw_randomWheelType();
   }
 
   if(Math.random() < gen_mutation)
