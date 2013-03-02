@@ -60,7 +60,7 @@ var listener = new b2ContactListener;
 //            console.log(contact.GetFixtureB().GetBody());
 		}
 		
-		if (idA.wheelType == -1 && idB.wheelType == 100) {
+		if (idA.wheelType == -1 && idB.wheelType == 10) {
 			idB.is_dead = true;
 //            console.log("Colide");
 //            console.log(contact.GetFixtureA().GetBody());
