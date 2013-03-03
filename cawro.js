@@ -335,6 +335,9 @@ function cw_createFloor() {
         case 4: // downstairs
 			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k % 10 == 0 && k ? -1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
 			break;
+		case 5: // full random
+			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k >= maxFloorTiles - 3 ? 1.5 : (Math.random()*3 - 1.5));
+			break;
     }
 	cw_floorTiles.push(last_tile);
     last_fixture = last_tile.GetFixtureList();
@@ -591,7 +594,7 @@ function cw_setTrackFraction(arg_trackFraction) {
 	cw_resetWorld();
 }
 
-function cw_changeLegWheelRatio() {
+function cw_changeWheelKindTiers() {
 	leg_kind_tier = (document.getElementById("legKindTier").value);
 	wheel_kind_tier = (document.getElementById("wheelKindTier").value);
 	
