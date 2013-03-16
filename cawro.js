@@ -338,6 +338,9 @@ function cw_createFloor() {
 		case 5: // full random
 			last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k >= maxFloorTiles - 3 ? 1.5 : (Math.random()*3 - 1.5));
 			break;
+        case 6: // untitled
+            last_tile = cw_createFloorTile(tile_position, k < 3 ? -1.5: k % 10 == 0 ? -1.5 : k % 5 == 0 ? 1.5 : (Math.random()*3 - 1.5) * 1.5*k/maxFloorTiles);
+			break;
     }
 	cw_floorTiles.push(last_tile);
     last_fixture = last_tile.GetFixtureList();
