@@ -34,6 +34,7 @@ var cw_graphAverage = new Array();
 
 var gen_trackType = 0;
 var gen_trackFraction = 1;
+var gen_trackFrictionType = 1; // {0: 0.0, 1: 0.5, 2: 1.0, 3: random}
 
 var gen_champions = 1;
 var gen_parentality = 0.2;
@@ -201,7 +202,7 @@ function cw_createChassisPart(body, vertex1, vertex2) {
   var fix_def = new b2FixtureDef();
   fix_def.shape = new b2PolygonShape();
   fix_def.density = 4 * (wheelMaxDensity + wheelMinDensity);
-  fix_def.friction = 10;
+  fix_def.friction = 1;
   fix_def.restitution = 0.2;
   fix_def.filter.groupIndex = -1;
   fix_def.shape.SetAsArray(vertex_list,3);
@@ -363,7 +364,13 @@ function cw_createFloorTile(position, angle) {
   var body = world.CreateBody(body_def);
   fix_def = new b2FixtureDef();
   fix_def.shape = new b2PolygonShape();
-  fix_def.friction = 0.5;
+
+  switch(gen_trackFrictionType) {
+      case 0: fix_def.friction = 0.0; break;
+      case 1: fix_def.friction = 0.5; break;
+      case 2: fix_def.friction = 1.0; break;
+      case 3: fix_def.friction = Math.random(); break;
+  }
 
   var coords = new Array();
   coords.push(new b2Vec2(0,0));
@@ -379,6 +386,7 @@ function cw_createFloorTile(position, angle) {
 
   body.CreateFixture(fix_def);
   body.wheelType = -1;
+  body.friction = fix_def.friction;
   return body;
 }
 
@@ -587,6 +595,11 @@ function cw_setTrackType(arg_trackType) {
 	cw_resetWorld();
 }
 
+function cw_setTrackFrictionType(arg_trackFrictionType) {
+    gen_trackFrictionType = parseInt(arg_trackFrictionType, 10);
+    cw_resetWorld();
+}
+
 function cw_setTrackFraction(arg_trackFraction) {
 	gen_trackFraction = parseInt(arg_trackFraction, 10);
 	
@@ -630,14 +643,27 @@ function cw_drawScreen() {
 }
 
 function cw_drawFloor() {
-  ctx.strokeStyle = "#000";
-  ctx.fillStyle = "#777";
-  ctx.lineWidth = 1/zoom;
-  ctx.beginPath();
-
+  if (gen_trackFrictionType != 3) { // if not random friction
+    ctx.strokeStyle = "#000";
+    switch(gen_trackFrictionType) {
+        case 0: ctx.fillStyle = "#ddd"; break;
+        case 1: ctx.fillStyle = "#777"; break;
+        case 2: ctx.fillStyle = "#222"; break;
+    }
+    ctx.lineWidth = 1/zoom;
+    ctx.beginPath();
+  }
   outer_loop:
   for(var k = Math.max(0,last_drawn_tile-cw_floorTiles.length/5); k < cw_floorTiles.length; k++) {
     var b = cw_floorTiles[k];
+
+    if (gen_trackFrictionType == 3) { // if random friction
+        ctx.strokeStyle = "#000";
+        ctx.fillStyle = b.friction < 0.2 ? "#ddd" : b.friction > 0.8 ? "#222" : "#777";
+        ctx.lineWidth = 1/zoom;
+        ctx.beginPath();
+    }
+
     for (f = b.GetFixtureList(); f; f = f.m_next) {
       var s = f.GetShape();
       var shapePosition = b.GetWorldPoint(s.m_vertices[0]).x;
@@ -648,11 +674,18 @@ function cw_drawFloor() {
         last_drawn_tile = k;
         break outer_loop;
       }
+      
+      if (gen_trackFrictionType == 3) { // if random friction
+          ctx.fill();
+          ctx.stroke();
+      }
     }
   }
-  ctx.fill();
-  ctx.stroke();
-}
+  if (gen_trackFrictionType != 3) { // if not random friction
+      ctx.fill();
+      ctx.stroke();
+  }
+ }
 
 function cw_drawCar(myCar) {
 

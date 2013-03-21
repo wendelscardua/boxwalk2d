@@ -165,7 +165,16 @@
         </select>
       </div>
       <div>
-        How much Cargo:
+        Select track friction:
+        <select id="trackfriction" onchange="cw_setTrackFrictionType(this.options[this.selectedIndex].value)">
+          <option value="0">0.0</option>
+          <option value="1" selected="selected">0.5</option>
+          <option value="2">1.0</option>
+          <option value="3">Random</option>
+        </select>
+      </div>
+     <div>
+        Number of "cargo wheels":
         <select id="numCargo" onchange="cw_setNumCargo(this.options[this.selectedIndex].value)">
           <option value="1">1</option>
           <option value="2" selected="selected">2</option>
@@ -176,10 +185,10 @@
         </select>
       </div>
       <div>
-        Leg/Wheel/Box tiers:
-        <input type="text" value="0.33" id="legKindTier"/>
-        <input type="text" value="0.67" id="wheelKindTier"/>
-        <input type="button" value="Go!" onclick="cw_changeWheelKindTiers()" />
+        Leg/Wheel/Box tiers:<br/>
+        <input type="text" value="0.33" id="legKindTier"/><br/>
+        <input type="text" value="0.67" id="wheelKindTier"/><br/>
+        <input type="button" value="Apply" onclick="cw_changeWheelKindTiers()" />
       </div>
       <div id="generation"></div>
       <div id="distancemeter"></div>
@@ -195,9 +204,11 @@
       Elite clones: The top n cars that will be copied over to the next generation.<br />
 	  Track Type: Select different tracks (resets world)<br />
 	  Track Fraction: Make track tiles smaller (resets world)<br />
-	  Num Wheels: Change how many wheels (or legs) the cars have (resets world)<br />
-	  Leg/Wheel ratio: Float value between 0 and 1. 0 = only wheels, 1 = only legs (resets world)<br />
-      View top replay: Pause the current simulation and show the top performing car. Click a second time to resume simulation.
+	  Track Friction: Changes track tiles' friction factor (resets world)<br />
+	  Number of cargo wheels: Chooses how many wheels - from the default 8 - will be cargo. Cargo wheels can't touch the floor. (resets world)<br />
+	  Leg/Wheel/Box tiers: Float values between 0 and 1. When rolling a random car, a float number is rolled for each wheel. 
+                           If less than the first number, it'll be a "leg" wheel. If it's greate than the second one, it'll be a "box" wheel. 
+                           Otherwise, it'll be a common, round wheel. <br />
       <h3>Graph</h3>
       Red: Top score in each generation.<br />
       Green: Average of the top 10 cars in each generation.<br />
